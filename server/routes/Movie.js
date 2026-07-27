@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import movie from "../models/movie.js";
+import Movie from "../models/Movie.js";
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
@@ -16,13 +16,13 @@ router.post("/upload", upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         });
 
         const thumbResult = await cloudinary.uploader.upload(req.files.thumbnail.path, {
-            folder: "moviebox-thumbs"
+            folder: "Moviebox-thumbs"
         });
 
         fs.unlinkSync(req.files.video.path);
         fs.unlinkSync(req.files.thumbnail.path);
 
-        const newMovie = new movie({
+        const newMovie = new Movie({
             title: req.body.title,
             description: req.body.description,
             genre: req.body.genre.split(","),
@@ -41,7 +41,7 @@ router.post("/upload", upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
 // GET /api/movies - get all approved
 router.get("/", async (req, res) => {
     try {
-        const movies = await movie.find({ status: "approved" }).sort({ createdAt: -1 });
+        const Movies = await Movie.find({ status: "approved" }).sort({ createdAt: -1 });
         res.json(movies);
     } catch (err) {
         res.status(500).json({ error: err.message });
