@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import Movie from "../models/Movie.js";
+import movie from "../models/Movie.js";
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
