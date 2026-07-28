@@ -46,7 +46,7 @@ router.get("/", async (req, res) => {
 
 export default router;
 // POST /api/movies/seed - add test movies to database
-router.post('/seed', async (req, res) => {
+router.get('/seed', async (req, res) => {
   try {
     // Clear old test movies first
     await Movie.deleteMany({})
