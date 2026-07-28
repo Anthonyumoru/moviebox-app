@@ -1,35 +1,38 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
-import dotenv from "dotenv";
-import { v2 as cloudinary } from "cloudinary";
-import movieRoutes from "./routes/movie.js";
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
 
-dotenv.config();
 const app = express();
-
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+const PORT = process.env.PORT || 5000;
 
 // Cloudinary config
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloudinary_url: process.env.CLOUDINARY_URL,
 });
 
+app.use(cors());
+app.use(express.json());
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log('MongoDB Error: ', err));
+
 // Test route
-app.get("/", (req, res) => res.send("MovieBox Server is Running 🚀"));
+app.get('/', (req, res) => {
+  res.send('MovieBox API is running...');
+});
 
-// Routes
-app.use("/api/movies", movieRoutes);
+// Import Routes
+const movieRoutes = require('./routes/movieRoutes');
+const authRoutes = require('./routes/authRoutes');
 
-// Database connection & Server initialization
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => {
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch(err => console.error("Database connection failed:", err));
+// Use Routes
+app.use('/api/movies', movieRoutes);
+app.use('/api/auth', authRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
