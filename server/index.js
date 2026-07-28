@@ -1,8 +1,8 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const cloudinary = require('cloudinary').v2;
-require('dotenv').config();
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import { v2 as cloudinary } from 'cloudinary';
+import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,8 +26,8 @@ app.get('/', (req, res) => {
 });
 
 // Import Routes
-const movieRoutes = require('./routes/movieRoutes');
-const authRoutes = require('./routes/authRoutes');
+import movieRoutes from './routes/movieRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Use Routes
 app.use('/api/movies', movieRoutes);
