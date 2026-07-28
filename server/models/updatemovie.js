@@ -1,36 +1,41 @@
 import Movie from './movie.js';
+import axios from 'axios';
+import mongoose from 'mongoose';
+
+const TMDB_KEY = process.env.TMDB_KEY;
 
 const updateMovies = async () => {
-    console.log("Starting movie update...");
-    
-    const updates = [
-        {
-            id: 1,
-            $set: {
-                overview: "A thief who steals corporate secrets through the use of dream-sharing technology...",
-                year: 2010,
-                rating: 8.8,
-                poster: "https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg",
-                backdrop: "https://image.tmdb.org/t/p/original/s3TBrRGB1iav7gFOCNx3H31MoES.jpg"
-            }
-        },
-        {
-            id: 2,
-            $set: {
-                overview: "When the menace known as the Joker wreaks havoc...",
-                year: 2008,
-                rating: 9.0,
-                poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-                backdrop: "https://image.tmdb.org/t/p/original/hqkIcbrOHL86UncnHIsHVcVmzue.jpg"
-            }
-        }
-    ];
+  console.log("Starting movie update...");
+  
+  await mongoose.connect(process.env.MONGO_URI);
+  
+  const movieIds = [27205, 157336, 299534, 155]; // Inception, Interstellar, Endgame, Dark Knight
 
-    for (const update of updates) {
-        await Movie.updateOne({ id: update.id }, update);
-    }
+  for(const id of movieIds) {
+    const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_KEY}&append_to_response=videos`);
+    const data = res.data;
     
-    console.log("Movies Updated Successfully!");
+    const trailer = data.videos.results.find(v => v.type === 'Trailer');
+    
+    await Movie.findOneAndUpdate(
+      { id: data.id },
+      {
+        id: data.id,
+        title: data.title,
+        overview: data.overview,
+        poster: `https://image.tmdb.org/t/p/w500${data.poster_path}`,
+        backdrop: `https://image.tmdb.org/t/p/original${data.backdrop_path}`,
+        videoUrl: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : '',
+        rating: data.vote_average,
+        year: data.release_date.split('-')[0]
+      },
+      { upsert: true }
+    );
+    console.log(`Updated: ${data.title}`);
+  }
+  
+  console.log("Movies Updated Successfully!");
+  mongoose.disconnect();
 }
 
 export default updateMovies;
