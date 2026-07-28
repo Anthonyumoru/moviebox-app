@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'https://moviebox-app-production-ddf2.up.railway.app/api/upload'; // CHANGE THIS TO YOUR RAILWAY URL
+const API_URL = 'https://moviebox-app-production-dd12.up.railway.app/api/movies'; // CHANGE THIS TO YOUR RAILWAY URL
 
 const Upload = () => {
   const [movieTitle, setMovieTitle] = useState('');
