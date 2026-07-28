@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
-import MovieRoutes from "./routes/Movie.js";
+import MovieRoutes from "./routes/movie.js";
 
 dotenv.config();
 const app = express();
