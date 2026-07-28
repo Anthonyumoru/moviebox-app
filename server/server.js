@@ -13,7 +13,7 @@ const app = express();
 app.use(cors({
     origin: [
         "https://moviebox-app-umoruanthony965-4125s-projects.vercel.app/",  // your Vercel frontend
-        "http://localhost:5173" // for local testing
+        "https://moviebox-app-production-dd12.up.railway.app/api/movies" // for local testing
     ],
     credentials: true
 }));
