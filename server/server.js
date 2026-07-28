@@ -11,8 +11,11 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-  credentials: true
+    origin: [
+        "https://moviebox-app-umoruanthony965-4125s-projects.vercel.app/",  // your Vercel frontend
+        "http://localhost:5173" // for local testing
+    ],
+    credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
