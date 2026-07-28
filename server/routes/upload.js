@@ -5,7 +5,7 @@ const fileupload = require('express-fileupload');
 const Movie = require('../models/movie');
 const Music = require('../models/music');
 
-router.use(fileupload({ 
+router.use(fileupload({
   useTempFiles: true,
   tempFileDir: '/tmp/',
   limits: { fileSize: 500 * 1024 * 1024 } // 500MB limit
@@ -21,17 +21,14 @@ cloudinary.config({
 router.post('/movie', async (req, res) => {
   try {
     const { title, description } = req.body;
-    
     if (!title) return res.status(400).json({ error: 'Title is required' });
-    if (!req.files ||!req.files.video) {
-      return res.status(400).json({ error: 'No video file uploaded' });
-    }
+    if (!req.files || !req.files.video) return res.status(400).json({ error: 'No video file uploaded' });
 
     console.log("Uploading to cloudinary...");
     const result = await cloudinary.uploader.upload(req.files.video.tempFilePath, {
       resource_type: "video",
       folder: "moviebox/movies",
-      chunk_size: 6000000 // for big files
+      chunk_size: 6000000
     });
 
     const movie = await Movie.create({
@@ -54,14 +51,11 @@ router.post('/movie', async (req, res) => {
 router.post('/music', async (req, res) => {
   try {
     const { title, artist } = req.body;
-    
     if (!title) return res.status(400).json({ error: 'Title is required' });
-    if (!req.files ||!req.files.audio) {
-      return res.status(400).json({ error: 'No audio file uploaded' });
-    }
+    if (!req.files || !req.files.audio) return res.status(400).json({ error: 'No audio file uploaded' });
 
     const result = await cloudinary.uploader.upload(req.files.audio.tempFilePath, {
-      resource_type: "video",
+      resource_type: "video", // cloudinary uses "video" for audio too
       folder: "moviebox/music"
     });
 
