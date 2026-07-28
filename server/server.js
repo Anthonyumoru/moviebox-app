@@ -3,8 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const cloudinary = require('cloudinary');
-const fileupload = require('express-fileupload'); // ADD THIS
+const cloudinary = require('cloudinary').v2;
+const fileupload = require('express-fileupload');
+const uploadRoutes = require('./routes/upload.js'); // 1. ADD THIS
+
 const app = express();
 
 // Middleware
@@ -13,8 +15,14 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(fileupload({ useTempFiles: true })); // ADD THIS
-app.use('/api/upload', require('./routes/upload')); // ADD THIS
+app.use(express.urlencoded({ extended: true }));
+app.use(fileupload({ 
+  useTempFiles: true,
+  tempFileDir: '/tmp/'
+})); // 2. FIX: Added tempFileDir for Railway
+
+// Connect Routes
+app.use('/api/upload', uploadRoutes); // 3. ADD THIS
 
 // Cloudinary Config
 cloudinary.config({
@@ -27,14 +35,14 @@ cloudinary.config({
 mongoose.set('strict', false);
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {
-  console.log('MongoDB Connected ✅');
-  updateMovies(); // <-- ADD THIS
+  console.log('MongoDB Connected');
+  updateMovies();
 })
 .catch(err => console.log('MongoDB Error:', err));
 
 // Test Route
 app.get('/', (req, res) => {
-  res.send('MovieBox Server is Running 🔥');
+  res.send('Movibox Server is Running 🔥');
 });
 
 const PORT = process.env.PORT || 5000;
