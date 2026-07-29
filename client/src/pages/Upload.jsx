@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 // FIXED: Using your exact live production backend endpoint address
-const API_URL = 'https://railway.app';
+const API_URL = 'https://moviebox-app-production-dd12.up.railway.app/api/movies';
 
 const Upload = () => {
   const [movieTitle, setMovieTitle] = useState('');
