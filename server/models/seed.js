@@ -1,4 +1,4 @@
-const Movie = require('./movie.js'); // make sure filename matches
+import Movie from './movie.js'; // make sure movie.js also uses export
 
 const movies = [
   {
@@ -8,7 +8,7 @@ const movies = [
     "rating": 8.8,
     "poster": "https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg",
     "backdrop": "https://image.tmdb.org/t/p/original/s3TBRqn8p7Jd0h9k2eQf7oJk6X.jpg",
-    "overview": "A thief who steals corporate secrets through the use of dream-sharing technology...",
+    "overview": "A thief who steals corporate secrets...",
     "videoUrl": ""
   },
   {
@@ -18,7 +18,7 @@ const movies = [
     "rating": 9.0,
     "poster": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6mKaRhLhF0.jpg",
     "backdrop": "https://image.tmdb.org/t/p/original/hqkcichhXwK9c2bJ3X5K6L7.jpg",
-    "overview": "When the menace known as the Joker wreaks havoc...",
+    "overview": "When the menace known as the Joker...",
     "videoUrl": ""
   },
   {
@@ -28,7 +28,7 @@ const movies = [
     "rating": 8.6,
     "poster": "https://image.tmdb.org/t/p/w500/AIYFfDkDqKcY4m5Y7Z8.jpg",
     "backdrop": "https://image.tmdb.org/t/p/original/AIYFfDkDqKcY4m5Y7Z8.jpg",
-    "overview": "A team of explorers travel through a wormhole in space...",
+    "overview": "A team of explorers travel through a wormhole...",
     "videoUrl": ""
   },
   {
@@ -47,6 +47,9 @@ const seedDB = async () => {
   await Movie.deleteMany({}); // clear old data
   await Movie.insertMany(movies);
   console.log("Database Seeded!");
+  process.exit();
 }
 
-module.exports = seedDB;
+seedDB();
+
+export default seedDB;
