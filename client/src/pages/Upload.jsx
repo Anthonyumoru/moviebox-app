@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 // FIXED: Removed the trailing slash at the end of the URL string
-const API_URL = 'https://railway.app';
+const API_URL = 'moviebox-app-production-dd12.up.railway.app';
 
 const Upload = () => {
   const [movieTitle, setMovieTitle] = useState('');
