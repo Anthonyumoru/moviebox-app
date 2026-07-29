@@ -3,9 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const cloudinary = require('cloudinary').v2;
-const fileupload = require('express-fileupload');
+const cloudinary = require('./utils/cloudinary');
+const fileUpload = require('express-fileupload');
 const uploadRoutes = require('./routes/upload.js'); // 1. ADD THIS
+const adminRoutes = require('./routes/admin.js'); // 2. ADD THIS FOR OWNER
 
 const app = express();
 
@@ -19,33 +20,34 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileupload({ 
-  useTempFiles: true,
-  tempFileDir: '/tmp/'
-})); // 2. FIX: Added tempFileDir for Railway
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/', // FIX: Added tempFileDir for Railway
+}));
 
 // Connect Routes
 app.use('/api/upload', uploadRoutes); // 3. ADD THIS
+app.use('/api/admin', adminRoutes); // 4. ADD THIS FOR OWNER
 
 // Cloudinary Config
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_CLOUDINARY_API_SECRET,
 });
 
 // Connect to MongoDB
 mongoose.set('strict', false);
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {
-  console.log('MongoDB Connected');
-  updateMovies();
+    console.log('MongoDB Connected');
+    updateMovies();
 })
 .catch(err => console.log('MongoDB Error:', err));
 
 // Test Route
 app.get('/', (req, res) => {
-  res.send('Movibox Server is Running 🔥');
+    res.send('MovieBox Server is Running 🚀');
 });
 
 const PORT = process.env.PORT || 5000;
