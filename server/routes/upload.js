@@ -39,7 +39,7 @@ router.post('/r2-upload-url', async (req, res) => {
     res.json({ 
       url, 
       fields, 
-      publicUrl: `${process.env.R2_PUBLIC_URL}/${key}` 
+      publicUrl: `${process.env.PUBLIC_URL}/${key}` 
     });
   } catch(err) {
     console.log(err);
