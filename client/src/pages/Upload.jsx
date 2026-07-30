@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 // FIXED: Using your exact live production backend endpoint address
-const API_URL = 'https://moviebox-backend.umoruanthony345.workers.dev/api/upload';
+const API_URL = 'https://moviebox-backend.umoruanthony345.workers.dev';
 
 const Upload = () => {
   const [movieTitle, setMovieTitle] = useState('');
@@ -25,7 +25,7 @@ const Upload = () => {
     formData.append('file', movieFile); // Sends raw single file binary
 
     try {
-      const res = await axios.post(`${API_URL}/movie`, formData, {
+      const res = await axios.post(`${API_URL}/api/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Movie Uploaded Successfully!');
@@ -48,7 +48,7 @@ const Upload = () => {
     formData.append('audio', musicFile); // Maps perfectly to req.files.audio
 
     try {
-      const res = await axios.post(`${API_URL}/music`, formData, {
+      const res = await axios.post(`${API_URL}/api/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Music Uploaded Successfully!');
