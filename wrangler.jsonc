@@ -1,3 +1,4 @@
 {
+  "name": "moviebox-app",
   "pages_build_output_dir": "./client/dist"
 }
