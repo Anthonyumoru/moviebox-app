@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL; // Your Worker URL
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function R2Uploader({ onUpload }) {
   const [progress, setProgress] = useState(0);
+  const [category, setCategory] = useState("CHURCH");
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -15,10 +15,10 @@ export default function R2Uploader({ onUpload }) {
     if (!title) return alert("Add a title first");
 
     // 1. Get presigned URL from Worker
-    const { data } = await axios.post(
-      `${API_URL}/api/upload/r2-upload-url`,
-      { filename: file.name, contentType: file.type }
-    );
+    const { data } = await axios.post(`${API_URL}/api/upload-url`, {
+      filename: file.name,
+      contentType: file.type
+    });
 
     const { url, fields, publicUrl } = data;
 
@@ -37,11 +37,15 @@ export default function R2Uploader({ onUpload }) {
     const newMovie = {
       title: title,
       description: desc,
+      category: category,
       videoUrl: publicUrl,
-      posterUrl: "" 
+      posterUrl: "", // we can add thumbnail later
+      year: "2026",
+      rating: "9.0",
+      likes: 0
     };
 
-    await fetch(`${API_URL}/movies`, {
+    await fetch(`${API_URL}/api/videos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newMovie)
@@ -52,13 +56,21 @@ export default function R2Uploader({ onUpload }) {
     setProgress(0);
     document.getElementById('title').value = "";
     document.getElementById('desc').value = "";
-  };
+  }
 
   return (
-    <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-      <input id="title" type="text" placeholder="Movie Title" />
-      <input id="desc" type="text" placeholder="Description" />
-      <input type="file" accept="video/*" onChange={handleFile} />
+    <div style={{display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px', background: '#222', borderRadius: '8px'}}>
+      <input id="title" type="text" placeholder="Movie Title" className="p-2 rounded bg-gray-800 text-white" />
+      <input id="desc" type="text" placeholder="Description" className="p-2 rounded bg-gray-800 text-white" />
+      
+      <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 rounded bg-gray-800 text-white">
+        <option>CHURCH</option>
+        <option>COMEDY</option>
+        <option>MOVIE</option>
+        <option>MUSIC</option>
+      </select>
+
+      <input type="file" accept="video/*" onChange={handleFile} className="text-white" />
       {progress > 0 && <p>Uploading: {progress}%</p>}
     </div>
   );
