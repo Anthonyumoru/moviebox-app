@@ -1,5 +1,7 @@
-import { useState } from "react";
-import axios from "axios";
+import { useState } from 'react';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL; // Your Worker URL
 
 export default function R2Uploader({ onUpload }) {
   const [progress, setProgress] = useState(0);
@@ -8,9 +10,13 @@ export default function R2Uploader({ onUpload }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // 1. Get presigned URL from Railway backend
+    const title = document.getElementById('title').value;
+    const desc = document.getElementById('desc').value;
+    if (!title) return alert("Add a title first");
+
+    // 1. Get presigned URL from Worker
     const { data } = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/upload/r2-upload-url`,
+      `${API_URL}/api/upload/r2-upload-url`,
       { filename: file.name, contentType: file.type }
     );
 
@@ -21,19 +27,37 @@ export default function R2Uploader({ onUpload }) {
     Object.entries(fields).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    formData.append("file", file);
+    formData.append('file', file);
 
     await axios.post(url, formData, {
       onUploadProgress: (p) => setProgress(Math.round((p.loaded * 100) / p.total)),
     });
 
-    // 3. Send publicUrl to your backend to save in DB
+    // 3. Save movie to KV
+    const newMovie = {
+      title: title,
+      description: desc,
+      videoUrl: publicUrl,
+      posterUrl: "" 
+    };
+
+    await fetch(`${API_URL}/movies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newMovie)
+    });
+
     onUpload(publicUrl);
-    alert("Upload complete! " + publicUrl);
+    alert("Upload complete + Saved to KV!");
+    setProgress(0);
+    document.getElementById('title').value = "";
+    document.getElementById('desc').value = "";
   };
 
   return (
-    <div>
+    <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+      <input id="title" type="text" placeholder="Movie Title" />
+      <input id="desc" type="text" placeholder="Description" />
       <input type="file" accept="video/*" onChange={handleFile} />
       {progress > 0 && <p>Uploading: {progress}%</p>}
     </div>
