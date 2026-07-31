@@ -1,92 +1,29 @@
 :root {
   --bg: #ffffff;
-  --text: #111827;
-  --card: #f3f4f6;
-  --border: #d1d5db;
-  --muted: #6b7280;
+  --text: #111;
+  --card: #f5f5f5;
+  --border: #dddddd;
   --red: #e50914;
 }
 
 .dark {
-  --bg: #111827;
+  --bg: #0a0a0a;
   --text: #ffffff;
-  --card: #1f2937;
-  --border: #374151;
-  --muted: #9ca3af;
+  --card: #1a1a1a;
+  --border: #333333;
+  --red: #e50914;
 }
 
 body {
-  background-color: var(--bg);
+  background: var(--bg);
   color: var(--text);
   font-family: system-ui, sans-serif;
-  padding: 20px;
-  transition: background 0.3s, color 0.3s;
   margin: 0;
+  transition: background 0.3s, color 0.3s;
 }
 
-h3 {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-p {
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-
-.video-row { 
-  padding: 20px; 
-  color: var(--text); 
-  background: var(--card); 
-  border-radius: 12px;
-}
-
-.video-card { 
-  width: 100%; 
-  border: 1px solid var(--border);
-  border-radius: 8px; 
-  overflow: hidden; 
-  transition: transform 0.2s; 
-  cursor: pointer; 
+input, select, button {
   background: var(--card);
-  padding: 12px;
-}
-
-.video-card:hover { 
-  transform: scale(1.03); 
-  z-index: 10; 
-}
-
-.video-card video { 
-  width: 100%; 
-  display: none; /* hidden until play button */
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-/* Buttons */
-.theme-btn, .btn-play, .btn-download, .btn-delete {
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-play {
-  background: var(--red);
-  color: white;
-  border: none;
-}
-
-.btn-download {
-  background: transparent;
   color: var(--text);
-}
-
-.btn-delete {
-  background: #374151;
-  color: white;
-  border: none;
+  border: 1px solid var(--border);
 }
