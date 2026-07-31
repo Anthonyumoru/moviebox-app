@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL;
@@ -24,14 +25,30 @@ export default function R2Uploader({ onUpload }) {
         filename: file.name,
         contentType: file.type
       });
+
+      if (!data || !data.url) {
+        throw new Error("Worker did not return a presigned URL");
+      }
+
       const { url, publicUrl } = data;
 
-      // 2. Upload DIRECTLY to R2 (no Content-Type header)
-      await axios.put(url, file, {
-        onUploadProgress: (p) => {
-          if (p.total) setProgress(Math.round((p.loaded * 100) / p.total));
+      // 2. Upload DIRECTLY to R2 using fetch (NOT axios)
+      //    axios crashes on File objects with "Cannot convert undefined or null to object"
+      //    fetch handles File/Blob bodies natively
+      const uploadRes = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
         },
+        body: file,
       });
+
+      if (!uploadRes.ok) {
+        const errText = await uploadRes.text().catch(() => 'Unknown R2 error');
+        throw new Error(`R2 upload failed (${uploadRes.status}): ${errText}`);
+      }
+
+      setProgress(100);
 
       // 3. Save to KV
       await fetch(`${API_URL}/movies`, {
@@ -50,7 +67,8 @@ export default function R2Uploader({ onUpload }) {
       alert("✅ Upload Complete! Your movie is now live");
 
     } catch (err) {
-      alert("❌ Upload failed: " + err.message);
+      console.error("Upload error:", err);
+      alert("❌ Upload failed: " + (err.message || "Unknown error"));
     }
 
     setProgress(0);
