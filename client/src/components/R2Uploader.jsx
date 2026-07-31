@@ -26,9 +26,8 @@ export default function R2Uploader({ onUpload }) {
       });
       const { url, publicUrl } = data;
 
-      // 2. Upload DIRECTLY to R2 (not through Worker)
+      // 2. Upload DIRECTLY to R2 (no Content-Type header)
       await axios.put(url, file, {
-        headers: { "Content-Type": file.type },
         onUploadProgress: (p) => {
           if (p.total) setProgress(Math.round((p.loaded * 100) / p.total));
         },
@@ -80,4 +79,4 @@ export default function R2Uploader({ onUpload }) {
     </div>
   );
 }
-
+```
