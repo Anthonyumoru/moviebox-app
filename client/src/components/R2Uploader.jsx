@@ -19,25 +19,22 @@ export default function R2Uploader({ onUpload }) {
     setProgress(1);
 
     try {
-      // 1. Upload file directly to Worker (Worker saves to R2)
-      const formData = new FormData();
-      formData.append("file", file);
+      // 1. Get presigned URL from Worker
+      const { data } = await axios.post(`${API_URL}/api/upload/r2-upload-url`, {
+        filename: file.name,
+        contentType: file.type
+      });
+      const { url, publicUrl } = data;
 
-      const res = await axios.post(`${API_URL}/api/upload/r2-upload-url`, formData, {
+      // 2. Upload DIRECTLY to R2 (not through Worker)
+      await axios.put(url, file, {
+        headers: { "Content-Type": file.type },
         onUploadProgress: (p) => {
-          if (p.total) {
-            setProgress(Math.round((p.loaded * 100) / p.total));
-          }
+          if (p.total) setProgress(Math.round((p.loaded * 100) / p.total));
         },
       });
 
-      const { success, publicUrl, error } = res.data;
-
-      if (!success) {
-        throw new Error(error || "Upload failed");
-      }
-
-      // 2. Now save the movie to KV
+      // 3. Save to KV
       await fetch(`${API_URL}/movies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,7 +47,7 @@ export default function R2Uploader({ onUpload }) {
         }),
       });
 
-      onUpload(); // refresh movies instantly
+      onUpload();
       alert("✅ Upload Complete! Your movie is now live");
 
     } catch (err) {
@@ -61,7 +58,7 @@ export default function R2Uploader({ onUpload }) {
     setUploading(false);
     document.getElementById('title').value = "";
     document.getElementById('desc').value = "";
-    e.target.value = ""; // reset file input
+    e.target.value = "";
   };
 
   return (
@@ -76,12 +73,10 @@ export default function R2Uploader({ onUpload }) {
 
       <input id="desc" type="text" placeholder="Short Description" style={{padding: '10px', borderRadius: '6px'}} />
 
-      {/* AUTO UPLOAD BUTTON */}
       <label style={{padding: '14px', background: uploading? '#666' : 'var(--red)', color: 'white', borderRadius: '6px', textAlign: 'center', cursor: 'pointer', fontWeight: 'bold'}}>
         {uploading? `⬆️ Uploading... ${progress}%` : '📁 Tap To Choose Video From Phone'}
         <input type="file" accept="video/*" onChange={handleFile} disabled={uploading} style={{display: 'none'}} />
       </label>
-
     </div>
   );
 }
