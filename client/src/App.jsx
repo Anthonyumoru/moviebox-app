@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import FileUploader from './FileUploader';
+import R2Uploader from './components/R2Uploader'
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -80,7 +80,7 @@ function App() {
         </select>
       </div>
 
-      <FileUploader onUpload={fetchMovies} />
+      <R2Uploader onUpload={fetchMovies} />
 
       {loading? <p>Loading...</p> : (
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px'}}>
