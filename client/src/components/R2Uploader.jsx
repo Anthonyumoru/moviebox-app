@@ -19,41 +19,42 @@ export default function R2Uploader({ onUpload }) {
     setProgress(1);
 
     try {
-      // 1. Get presigned URL from Worker
-      const { data } = await axios.post(`${API_URL}/api/upload/r2-upload-url`, {
-        filename: `${Date.now()}-${file.name.replace(/\s+/g, '-')}`,
-        contentType: file.type
-      });
-      const { url, fields, publicUrl } = data;
-
-      // 2. Upload to R2
+      // 1. Upload file directly to Worker (Worker saves to R2)
       const formData = new FormData();
-      Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
-      formData.append('file', file);
+      formData.append("file", file);
 
-      await axios.post(url, formData, {
-        onUploadProgress: (p) => setProgress(Math.round((p.loaded * 100) / p.total)),
+      const res = await axios.post(`${API_URL}/api/upload/r2-upload-url`, formData, {
+        onUploadProgress: (p) => {
+          if (p.total) {
+            setProgress(Math.round((p.loaded * 100) / p.total));
+          }
+        },
       });
 
-      // 3. Save to KV
-      const newMovie = {
-        title,
-        description: desc,
-        category: category,
-        videoUrl: publicUrl,
-        posterUrl: ""
-      };
+      const { success, publicUrl, error } = res.data;
+
+      if (!success) {
+        throw new Error(error || "Upload failed");
+      }
+
+      // 2. Now save the movie to KV
       await fetch(`${API_URL}/movies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMovie)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title,
+          description: desc,
+          category: category,
+          videoUrl: publicUrl,
+          posterUrl: "",
+        }),
       });
 
       onUpload(); // refresh movies instantly
       alert("✅ Upload Complete! Your movie is now live");
 
     } catch (err) {
-      alert("❌ Upload failed: " + err.message)
+      alert("❌ Upload failed: " + err.message);
     }
 
     setProgress(0);
@@ -84,3 +85,4 @@ export default function R2Uploader({ onUpload }) {
     </div>
   );
 }
+
