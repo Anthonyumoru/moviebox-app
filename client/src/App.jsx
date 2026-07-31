@@ -50,7 +50,7 @@ function App() {
   });
 
   return (
-    <div style={{padding: '20px', maxWidth: '1300px', margin: 'auto', background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh'}}>
+    <div style={{padding: '20px', maxWidth: '1300px', margin: 'auto', minHeight: '100vh'}}>
       {/* Header */}
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
         <h1>MovieBox 🎬</h1>
