@@ -1,8 +1,205 @@
-    :root {
-      font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    }
-    body {
-      margin: 0;
-      background-color: #242424;
-      color: white;
-    }
+:root {
+  --bg: #ffffff;
+  --text: #111;
+  --card: #f5f5f5;
+  --border: #dddddd;
+  --red: #e50914;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --text: #ffffff;
+  --card: #1a1a1a;
+  --border: #333333;
+  --red: #e50914;
+  --shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+input, select, button, textarea {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-left { display: flex; align-items: center; gap: 20px; }
+.nav-logo { font-size: 20px; font-weight: 800; color: var(--red); text-decoration: none; }
+.nav-link { color: var(--text); text-decoration: none; font-size: 15px; }
+.nav-link:hover { color: var(--red); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.theme-toggle:hover { background: var(--bg); }
+
+/* HOME */
+.home { padding: 16px; max-width: 1200px; margin: 0 auto; }
+
+/* SEARCH */
+.search-bar { margin-bottom: 16px; }
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 24px;
+}
+
+/* CATEGORY PILLS */
+.category-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.category-pills::-webkit-scrollbar { display: none; }
+.pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+.pill-active {
+  background: var(--red);
+  color: white;
+  border-color: var(--red);
+}
+
+/* MOVIE ROWS (Netflix style) */
+.movie-sections { display: flex; flex-direction: column; gap: 32px; }
+.movie-row { }
+.row-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+.movie-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.movie-scroll::-webkit-scrollbar { display: none; }
+
+/* MOVIE CARD */
+.movie-card {
+  min-width: 200px;
+  max-width: 200px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.movie-card:hover { transform: scale(1.05); }
+.movie-thumb {
+  width: 100%;
+  height: 120px;
+  background: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.movie-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.movie-thumb-placeholder { font-size: 40px; }
+.movie-info { padding: 10px; flex: 1; }
+.movie-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.movie-desc {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.movie-cat-tag {
+  font-size: 10px;
+  background: var(--red);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.play-btn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: var(--red);
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.play-btn:hover { opacity: 0.85; }
+
+/* EMPTY STATE */
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 16px;
+}
+
+/* UPLOAD PAGE */
+.upload-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.upload-box {
+  background: var(--card);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 20px;
+}
