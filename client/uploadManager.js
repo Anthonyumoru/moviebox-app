@@ -4,7 +4,7 @@ const MAX_PARALLEL = 3;
 const MAX_RETRIES = 3;
 
 function sanitizeFilename(name) {
-  return name.replace(/[`'’" #?\\]/g, "_");
+  return name.replace(/[`''" #?\\]/g, "_");
 }
 
 export class UploadManager {
@@ -34,14 +34,29 @@ export class UploadManager {
   abort() { this.aborted = true; }
 
   async _uploadSingle(file, onProgress) {
-    const res = await fetch(`${this.backendUrl}/api/upload/r2-upload-url`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: sanitizeFilename(file.name), contentType: file.type }),
+    const filename = sanitizeFilename(file.name);
+    const contentType = file.type || "application/octet-stream";
+    const uploadUrl = `${this.backendUrl}/api/upload/single?filename=${encodeURIComponent(filename)}&contentType=${encodeURIComponent(contentType)}`;
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", uploadUrl, true);
+      xhr.setRequestHeader("Content-Type", "application/octet-stream");
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total);
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const data = JSON.parse(xhr.responseText);
+          resolve(data.publicUrl);
+        } else {
+          reject(new Error(`Upload failed: ${xhr.status}`));
+        }
+      };
+      xhr.onerror = () => reject(new Error("Network error during upload"));
+      xhr.onabort = () => reject(new Error("Upload aborted"));
+      xhr.send(file);
     });
-    const { url, publicUrl } = await res.json();
-    await this._putWithProgress(url, file, file.type, onProgress);
-    return publicUrl;
   }
 
   async _uploadMultipart(file, onProgress) {
@@ -107,46 +122,24 @@ export class UploadManager {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (this.aborted) throw new Error("Upload aborted");
       try {
-        const urlRes = await fetch(`${this.backendUrl}/api/upload/part-url`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key, uploadId, partNumber }),
-        });
-        const { url } = await urlRes.json();
+        const partUrl = `${this.backendUrl}/api/upload/part?key=${encodeURIComponent(key)}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${partNumber}`;
 
-        const putRes = await fetch(url, {
-          method: "PUT",
+        const putRes = await fetch(partUrl, {
+          method: "POST",
           body: chunk,
           headers: { "Content-Type": "application/octet-stream" },
         });
 
         if (!putRes.ok) throw new Error(`Part ${partNumber} failed: ${putRes.status}`);
-        const etag = (putRes.headers.get("ETag") || "").replace(/"/g, "");
-        return { part: { partNumber, etag }, chunkSize };
+        const data = await putRes.json();
+
+        return { part: { partNumber, etag: data.etag }, chunkSize };
       } catch (err) {
         lastErr = err;
         await this._sleep(1000 * Math.pow(2, attempt));
       }
     }
     throw new Error(`Chunk ${partNumber} failed after ${MAX_RETRIES} retries: ${lastErr?.message}`);
-  }
-
-  _putWithProgress(url, file, contentType, onProgress) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("PUT", url, true);
-      xhr.setRequestHeader("Content-Type", contentType || "application/octet-stream");
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total);
-      };
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) resolve();
-        else reject(new Error(`Upload failed: ${xhr.status}`));
-      };
-      xhr.onerror = () => reject(new Error("Network error during upload"));
-      xhr.onabort = () => reject(new Error("Upload aborted"));
-      xhr.send(file);
-    });
   }
 
   _sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
