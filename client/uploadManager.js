@@ -3,6 +3,10 @@ const CHUNK_SIZE = 8 * 1024 * 1024;
 const MAX_PARALLEL = 3;
 const MAX_RETRIES = 3;
 
+function sanitizeFilename(name) {
+  return name.replace(/[`'’" #?\\]/g, "_");
+}
+
 export class UploadManager {
   constructor({ backendUrl } = {}) {
     this.backendUrl = backendUrl || "https://moviebox-backend.umoruanthony345.workers.dev";
@@ -33,7 +37,7 @@ export class UploadManager {
     const res = await fetch(`${this.backendUrl}/api/upload/r2-upload-url`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      body: JSON.stringify({ filename: sanitizeFilename(file.name), contentType: file.type }),
     });
     const { url, publicUrl } = await res.json();
     await this._putWithProgress(url, file, file.type, onProgress);
@@ -44,7 +48,7 @@ export class UploadManager {
     const initRes = await fetch(`${this.backendUrl}/api/upload/initiate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      body: JSON.stringify({ filename: sanitizeFilename(file.name), contentType: file.type }),
     });
     const { key, uploadId, publicUrl } = await initRes.json();
     if (!uploadId) throw new Error("Failed to initiate multipart upload");
