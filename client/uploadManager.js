@@ -147,22 +147,3 @@ export class UploadManager {
 
   _sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 }
-```
-
----
-
-Now here's **file 2 of 2** — `r2-cors-policy.json`. Copy everything below:
-
-```json
-[
-  {
-    "AllowedOrigins": [
-      "https://5944d23c.moviebox-app-a0b.pages.dev",
-      "https://moviebox-app-a0b.pages.dev"
-    ],
-    "AllowedMethods": ["GET", "PUT", "HEAD", "DELETE"],
-    "AllowedHeaders": ["Content-Type", "Content-Length"],
-    "ExposeHeaders": ["ETag"],
-    "MaxAgeSeconds": 3600
-  }
-]
