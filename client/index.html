@@ -1,224 +1,24 @@
-html
+Here's the correct `client/index.html` for your Vite React app. Copy everything below:
+
+---
+
+```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MovieBox — Upload</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-    .container { max-width: 600px; width: 100%; padding: 40px; }
-    h1 { font-size: 24px; margin-bottom: 24px; text-align: center; }
-    .upload-box { background: #1a1a1a; border: 2px dashed #444; border-radius: 12px; padding: 40px; text-align: center; transition: border-color 0.3s; }
-    .upload-box.dragover { border-color: #6366f1; background: #1e1b2e; }
-    .upload-box input[type="file"] { display: none; }
-    .upload-box label { display: inline-block; padding: 12px 24px; background: #6366f1; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 12px; }
-    .upload-box label:hover { background: #4f46e5; }
-    .upload-box p { margin-top: 12px; color: #888; font-size: 14px; }
-    .progress-container { margin-top: 24px; display: none; }
-    .progress-container.active { display: block; }
-    .progress-bar { width: 100%; height: 24px; background: #333; border-radius: 12px; overflow: hidden; position: relative; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); width: 0%; transition: width 0.3s ease; }
-    .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; color: #fff; }
-    .stats { margin-top: 12px; display: flex; justify-content: space-between; font-size: 13px; color: #888; }
-    .controls { margin-top: 16px; display: flex; gap: 12px; justify-content: center; }
-    .controls button { padding: 8px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .btn-pause { background: #f59e0b; color: #000; }
-    .btn-resume { background: #10b981; color: #000; }
-    .btn-cancel { background: #ef4444; color: #fff; }
-    .btn-save { background: #6366f1; color: #fff; }
-    .btn-save:disabled { background: #444; cursor: not-allowed; }
-    .movie-info { margin-top: 24px; display: none; }
-    .movie-info.active { display: block; }
-    .movie-info input, .movie-info select, .movie-info textarea { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; color: #fff; margin-bottom: 12px; font-size: 14px; }
-    .movie-info label { display: block; margin-bottom: 4px; font-size: 13px; color: #888; }
-    .status-msg { margin-top: 16px; text-align: center; font-size: 14px; }
-    .status-msg.error { color: #ef4444; }
-    .status-msg.success { color: #10b981; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🎬 MovieBox Upload</h1>
-    <div class="upload-box" id="uploadBox">
-      <p>Drag & drop your movie file here</p>
-      <p>or</p>
-      <label for="fileInput">Choose File</label>
-      <input type="file" id="fileInput" accept="video/*" />
-    </div>
-    <div class="progress-container" id="progressContainer">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-        <div class="progress-text" id="progressText">0%</div>
-      </div>
-      <div class="stats">
-        <span id="uploadedSize">0 MB</span>
-        <span id="totalSize">0 MB</span>
-      </div>
-      <div class="stats">
-        <span id="uploadSpeed">0 MB/s</span>
-        <span id="timeLeft">—</span>
-      </div>
-      <div class="controls">
-        <button class="btn-pause" id="pauseBtn">Pause</button>
-        <button class="btn-cancel" id="cancelBtn">Cancel</button>
-      </div>
-    </div>
-    <div class="movie-info" id="movieInfo">
-      <label>Movie Title</label>
-      <input type="text" id="movieTitle" placeholder="Enter movie title" />
-      <label>Category</label>
-      <select id="movieCategory">
-        <option value="Action">Action</option>
-        <option value="Comedy">Comedy</option>
-        <option value="Drama">Drama</option>
-        <option value="Horror">Horror</option>
-        <option value="Romance">Romance</option>
-        <option value="Sci-Fi">Sci-Fi</option>
-        <option value="Thriller">Thriller</option>
-        <option value="Uncategorized">Uncategorized</option>
-      </select>
-      <label>Description</label>
-      <textarea id="movieDescription" rows="3" placeholder="Enter movie description"></textarea>
-      <button class="btn-save" id="saveBtn">Save Movie</button>
-    </div>
-    <div class="status-msg" id="statusMsg"></div>
-  </div>
-
-  <script type="module">
-    import { UploadManager } from "./uploadManager.js";
-
-    const BACKEND_URL = "https://moviebox-backend.umoruanthony345.workers.dev";
-    const manager = new UploadManager({ backendUrl: BACKEND_URL });
-
-    let currentPublicUrl = null;
-    let startTime = Date.now();
-
-    const uploadBox = document.getElementById("uploadBox");
-    const fileInput = document.getElementById("fileInput");
-    const progressContainer = document.getElementById("progressContainer");
-    const progressFill = document.getElementById("progressFill");
-    const progressText = document.getElementById("progressText");
-    const uploadedSize = document.getElementById("uploadedSize");
-    const totalSize = document.getElementById("totalSize");
-    const uploadSpeed = document.getElementById("uploadSpeed");
-    const timeLeft = document.getElementById("timeLeft");
-    const movieInfo = document.getElementById("movieInfo");
-    const statusMsg = document.getElementById("statusMsg");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const cancelBtn = document.getElementById("cancelBtn");
-    const saveBtn = document.getElementById("saveBtn");
-
-    fileInput.addEventListener("change", (e) => {
-      if (e.target.files[0]) handleFile(e.target.files[0]);
-    });
-
-    uploadBox.addEventListener("dragover", (e) => { e.preventDefault(); uploadBox.classList.add("dragover"); });
-    uploadBox.addEventListener("dragleave", () => uploadBox.classList.remove("dragover"));
-    uploadBox.addEventListener("drop", (e) => {
-      e.preventDefault();
-      uploadBox.classList.remove("dragover");
-      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-    });
-
-    async function handleFile(file) {
-      startTime = Date.now();
-      progressContainer.classList.add("active");
-      movieInfo.classList.remove("active");
-      statusMsg.textContent = "";
-      statusMsg.className = "status-msg";
-      totalSize.textContent = formatBytes(file.size);
-
-      try {
-        const publicUrl = await manager.upload(file, {
-          onProgress: (uploaded, total) => {
-            const percent = Math.round((uploaded / total) * 100);
-            progressFill.style.width = percent + "%";
-            progressText.textContent = percent + "%";
-            uploadedSize.textContent = formatBytes(uploaded);
-            const elapsed = (Date.now() - startTime) / 1000;
-            const speed = uploaded / elapsed;
-            uploadSpeed.textContent = formatBytes(speed) + "/s";
-            timeLeft.textContent = formatTime((total - uploaded) / speed);
-          },
-        });
-
-        currentPublicUrl = publicUrl;
-        statusMsg.textContent = "✅ Upload complete! Fill in movie details below.";
-        statusMsg.className = "status-msg success";
-        movieInfo.classList.add("active");
-        document.getElementById("movieTitle").value = file.name.replace(/\.[^.]+$/, "");
-      } catch (err) {
-        statusMsg.textContent = "❌ " + err.message;
-        statusMsg.className = "status-msg error";
-      }
-    }
-
-    pauseBtn.addEventListener("click", () => {
-      if (manager.paused) {
-        manager.resume();
-        pauseBtn.textContent = "Pause";
-        pauseBtn.className = "btn-pause";
-      } else {
-        manager.pause();
-        pauseBtn.textContent = "Resume";
-        pauseBtn.className = "btn-resume";
-      }
-    });
-
-    cancelBtn.addEventListener("click", () => {
-      manager.abort();
-      progressContainer.classList.remove("active");
-      statusMsg.textContent = "Upload cancelled";
-      statusMsg.className = "status-msg error";
-    });
-
-    saveBtn.addEventListener("click", async () => {
-      const title = document.getElementById("movieTitle").value;
-      const category = document.getElementById("movieCategory").value;
-      const description = document.getElementById("movieDescription").value;
-      if (!title) { alert("Please enter a title"); return; }
-
-      saveBtn.disabled = true;
-      saveBtn.textContent = "Saving...";
-
-      try {
-        const res = await fetch(`${BACKEND_URL}/movies`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, category, description, videoUrl: currentPublicUrl }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          statusMsg.textContent = "✅ Movie saved successfully!";
-          statusMsg.className = "status-msg success";
-          movieInfo.classList.remove("active");
-          progressContainer.classList.remove("active");
-        } else {
-          throw new Error("Save failed");
-        }
-      } catch (err) {
-        statusMsg.textContent = "❌ " + err.message;
-        statusMsg.className = "status-msg error";
-      }
-      saveBtn.disabled = false;
-      saveBtn.textContent = "Save Movie";
-    });
-
-    function formatBytes(bytes) {
-      if (bytes === 0) return "0 MB";
-      const mb = bytes / (1024 * 1024);
-      if (mb < 1024) return mb.toFixed(1) + " MB";
-      return (mb / 1024).toFixed(2) + " GB";
-    }
-
-    function formatTime(seconds) {
-      if (!isFinite(seconds) || seconds < 0) return "—";
-      if (seconds < 60) return Math.ceil(seconds) + "s";
-      if (seconds < 3600) return Math.ceil(seconds / 60) + "m";
-      return Math.ceil(seconds / 3600) + "h";
-    }
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MovieBox</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
+```
+
+---
+
+This is the standard Vite React entry point — it just loads your React app from `src/main.jsx`. Commit this to GitHub.
+
+Now tell me when you're ready for the updated **App.jsx** with the 3 new features (Mood Picker, Continue Watching, Movie Requests).
