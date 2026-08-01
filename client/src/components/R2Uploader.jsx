@@ -29,7 +29,7 @@ export default function R2Uploader({ onUpload }) {
         },
       });
 
-      await fetch(`${API_URL}/movies`, {
+      const saveRes = await fetch(`${API_URL}/movies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,6 +40,12 @@ export default function R2Uploader({ onUpload }) {
           posterUrl: "",
         }),
       });
+
+      const saveData = await saveRes.json();
+
+      if (!saveData.success) {
+        throw new Error("Failed to save movie metadata: " + (saveData.error || "Unknown"));
+      }
 
       onUpload();
       alert("✅ Upload Complete! Your movie is now live");
