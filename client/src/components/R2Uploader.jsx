@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UploadManager } from "../uploadManager.js";
+import { UploadManager } from "../../uploadManager.js";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
 
