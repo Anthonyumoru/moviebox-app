@@ -5,6 +5,46 @@ const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umorua
 
 const manager = new UploadManager({ backendUrl: API_URL });
 
+// Generate a thumbnail from the video file
+async function generateThumbnail(file) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.playsInline = true;
+
+    const url = URL.createObjectURL(file);
+    video.src = url;
+
+    video.onloadedmetadata = () => {
+      // Seek to 1 second or 10% into the video
+      video.currentTime = Math.min(1, video.duration * 0.1);
+    };
+
+    video.onseeked = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url);
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Failed to generate thumbnail"));
+        }
+      }, "image/jpeg", 0.8);
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load video for thumbnail"));
+    };
+  });
+}
+
 export default function R2Uploader({ onUpload }) {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -22,13 +62,33 @@ export default function R2Uploader({ onUpload }) {
     setProgress(1);
 
     try {
+      // 1. Generate thumbnail from video
+      let posterUrl = "";
+      try {
+        setProgress(5);
+        const thumbBlob = await generateThumbnail(file);
+        const thumbFile = new File([thumbBlob], `${title.replace(/\s+/g, "-")}-thumb.jpg`, {
+          type: "image/jpeg",
+        });
+        posterUrl = await manager.upload(thumbFile, {
+          onProgress: (uploaded, total) => {
+            const percent = 5 + Math.round((uploaded / total) * 10);
+            setProgress(percent);
+          },
+        });
+      } catch (err) {
+        console.warn("Thumbnail generation failed:", err);
+      }
+
+      // 2. Upload the video
       const publicUrl = await manager.upload(file, {
         onProgress: (uploaded, total) => {
-          const percent = Math.round((uploaded / total) * 100);
+          const percent = 15 + Math.round((uploaded / total) * 80);
           setProgress(percent);
         },
       });
 
+      // 3. Save movie metadata with thumbnail
       const saveRes = await fetch(`${API_URL}/movies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,7 +97,7 @@ export default function R2Uploader({ onUpload }) {
           description: desc,
           category: category,
           videoUrl: publicUrl,
-          posterUrl: "",
+          posterUrl: posterUrl,
         }),
       });
 
@@ -47,6 +107,7 @@ export default function R2Uploader({ onUpload }) {
         throw new Error("Failed to save movie metadata: " + (saveData.error || "Unknown"));
       }
 
+      setProgress(100);
       onUpload();
       alert("✅ Upload Complete! Your movie is now live");
     } catch (err) {
