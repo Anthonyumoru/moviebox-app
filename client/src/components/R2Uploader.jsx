@@ -230,4 +230,3 @@ export default function R2Uploader({ onUpload }) {
     </div>
   );
 }
-You can also **delete `uploadManager.js`** since it's no longer needed. Copy this into your `R2Uploader.jsx` on GitHub, commit, and Pages will redeploy.
