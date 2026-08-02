@@ -144,7 +144,7 @@ function App() {
     <div className="home">
       <div className="nav">
         <div className="nav-left">
-          <span className="nav-logo">🎬 MovieBox</span>
+          <span className="nav-logo">🎬NaijaFlix</span>
         </div>
         <div className="nav-right" style={{ display: "flex", gap: "8px" }}>
           <button className="theme-toggle" onClick={() => setShowRequests(!showRequests)} style={{ fontSize: "16px" }}>
