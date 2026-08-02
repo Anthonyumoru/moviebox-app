@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { UploadManager } from "../../uploadManager.js";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
 
-const manager = new UploadManager({ backendUrl: API_URL });
+// Chunk size for multipart uploads (10MB per part)
+const CHUNK_SIZE = 10 * 1024 * 1024;
+// Files above this use multipart upload
+const MULTIPART_THRESHOLD = 100 * 1024 * 1024;
 
 // Generate a thumbnail from the video file
 async function generateThumbnail(file) {
@@ -17,7 +19,6 @@ async function generateThumbnail(file) {
     video.src = url;
 
     video.onloadedmetadata = () => {
-      // Seek to 1 second or 10% into the video
       video.currentTime = Math.min(1, video.duration * 0.1);
     };
 
@@ -45,6 +46,94 @@ async function generateThumbnail(file) {
   });
 }
 
+// Single-part upload (for files under 100MB)
+async function uploadSingle(file, onProgress) {
+  const filename = encodeURIComponent(file.name);
+  const contentType = encodeURIComponent(file.type || "application/octet-stream");
+
+  const res = await fetch(
+    `${API_URL}/api/upload/single?filename=${filename}&contentType=${contentType}`,
+    { method: "POST", body: file }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Single upload failed");
+  }
+
+  const data = await res.json();
+  if (onProgress) onProgress(file.size, file.size);
+  return data.publicUrl;
+}
+
+// Multipart upload (for files over 100MB)
+async function uploadMultipart(file, onProgress) {
+  // 1. Initiate
+  const initRes = await fetch(`${API_URL}/api/upload/initiate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type || "application/octet-stream",
+    }),
+  });
+
+  if (!initRes.ok) throw new Error("Failed to initiate upload");
+  const { key, uploadId } = await initRes.json();
+
+  // 2. Upload parts
+  const totalParts = Math.ceil(file.size / CHUNK_SIZE);
+  const parts = [];
+  let uploadedBytes = 0;
+
+  for (let i = 0; i < totalParts; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, file.size);
+    const chunk = file.slice(start, end);
+    const partNumber = i + 1;
+
+    const partRes = await fetch(
+      `${API_URL}/api/upload/part?key=${encodeURIComponent(key)}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${partNumber}`,
+      { method: "POST", body: chunk }
+    );
+
+    if (!partRes.ok) {
+      // Abort on failure
+      await fetch(`${API_URL}/api/upload/abort`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, uploadId }),
+      }).catch(() => {});
+      throw new Error(`Failed to upload part ${partNumber}/${totalParts}`);
+    }
+
+    const partData = await partRes.json();
+    parts.push({ partNumber, etag: partData.etag });
+    uploadedBytes += (end - start);
+    if (onProgress) onProgress(uploadedBytes, file.size);
+  }
+
+  // 3. Complete
+  const completeRes = await fetch(`${API_URL}/api/upload/complete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key, uploadId, parts }),
+  });
+
+  if (!completeRes.ok) throw new Error("Failed to complete upload");
+  const completeData = await completeRes.json();
+  return completeData.publicUrl;
+}
+
+// Smart upload — picks single or multipart automatically
+async function smartUpload(file, onProgress) {
+  if (file.size >= MULTIPART_THRESHOLD) {
+    return uploadMultipart(file, onProgress);
+  } else {
+    return uploadSingle(file, onProgress);
+  }
+}
+
 export default function R2Uploader({ onUpload }) {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -70,25 +159,21 @@ export default function R2Uploader({ onUpload }) {
         const thumbFile = new File([thumbBlob], `${title.replace(/\s+/g, "-")}-thumb.jpg`, {
           type: "image/jpeg",
         });
-        posterUrl = await manager.upload(thumbFile, {
-          onProgress: (uploaded, total) => {
-            const percent = 5 + Math.round((uploaded / total) * 10);
-            setProgress(percent);
-          },
+        posterUrl = await smartUpload(thumbFile, (uploaded, total) => {
+          const percent = 5 + Math.round((uploaded / total) * 10);
+          setProgress(percent);
         });
       } catch (err) {
         console.warn("Thumbnail generation failed:", err);
       }
 
-      // 2. Upload the video
-      const publicUrl = await manager.upload(file, {
-        onProgress: (uploaded, total) => {
-          const percent = 15 + Math.round((uploaded / total) * 80);
-          setProgress(percent);
-        },
+      // 2. Upload the video (auto single or multipart)
+      const publicUrl = await smartUpload(file, (uploaded, total) => {
+        const percent = 15 + Math.round((uploaded / total) * 80);
+        setProgress(percent);
       });
 
-      // 3. Save movie metadata with thumbnail
+      // 3. Save movie metadata to D1
       const saveRes = await fetch(`${API_URL}/movies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,3 +230,4 @@ export default function R2Uploader({ onUpload }) {
     </div>
   );
 }
+You can also **delete `uploadManager.js`** since it's no longer needed. Copy this into your `R2Uploader.jsx` on GitHub, commit, and Pages will redeploy.
