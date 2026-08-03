@@ -3,7 +3,7 @@ import R2Uploader from './components/R2Uploader';
 import CastButton from './components/CastButton';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
 
 function App() {
   const [movies, setMovies] = useState([]);
