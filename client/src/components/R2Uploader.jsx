@@ -223,3 +223,4 @@ export default function R2Uploader({ onUpload }) {
     </div>
   );
 }
+export default App;
