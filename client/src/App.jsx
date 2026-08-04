@@ -597,5 +597,10 @@ function App() {
     </div>
   );
 }
-
+<div style={{ textAlign: "center", padding: "20px", fontSize: "13px", color: "#888" }}>
+        © 2026 NaijaFlix. All rights reserved.
+      </div>
+    </div>
+  );
+}
 export default App;
