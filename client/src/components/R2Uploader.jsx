@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "hhttps://moviebox-backend.umoruanthony345.workers.dev";
+const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
 
 const CHUNK_SIZE = 10 * 1024 * 1024;
 const MULTIPART_THRESHOLD = 100 * 1024 * 1024;
@@ -139,7 +139,9 @@ export default function R2Uploader({ onUpload }) {
   const [check3, setCheck3] = useState(false);
   const [check4, setCheck4] = useState(false);
 
+  const isNollywood = category === "Nollywood";
   const allChecked = check1 && check2 && check3 && check4 && nfvcbNumber.trim().length > 0;
+  const canUpload = isNollywood ? allChecked : true;
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -151,7 +153,7 @@ export default function R2Uploader({ onUpload }) {
 
     const adminKey = localStorage.getItem("adminKey") || "";
     if (!adminKey) return alert("⚠️ Admin key required. Tap ⚙️ to set it first.");
-    if (!allChecked) return alert("⚠️ Please complete the compliance checklist first.");
+    if (isNollywood && !allChecked) return alert("⚠️ Please complete the Nollywood compliance checklist first.");
 
     setUploading(true);
     setProgress(1);
@@ -186,9 +188,9 @@ export default function R2Uploader({ onUpload }) {
           category: category,
           videoUrl: publicUrl,
           posterUrl: posterUrl,
-          nfvcbNumber: nfvcbNumber,
-          complianceChecks: { check1, check2, check3, check4 },
-          agreedAt: new Date().toISOString(),
+          nfvcbNumber: isNollywood ? nfvcbNumber : "",
+          complianceChecks: isNollywood ? { check1, check2, check3, check4 } : null,
+          agreedAt: isNollywood ? new Date().toISOString() : null,
         }),
       });
 
@@ -226,7 +228,7 @@ export default function R2Uploader({ onUpload }) {
       <h3>📤 Upload New Movie</h3>
       <input id="title" type="text" placeholder="Movie Title - REQUIRED" style={{ padding: "10px", borderRadius: "6px" }} />
 
-      <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: "10px", borderRadius: "6px" }}>
+      <select value={category} onChange={(e) => { setCategory(e.target.value); setShowChecklist(false); }} style={{ padding: "10px", borderRadius: "6px" }}>
         <option>Nollywood</option>
         <option>Church Program</option>
         <option>Comedy</option>
@@ -237,88 +239,92 @@ export default function R2Uploader({ onUpload }) {
 
       <input id="desc" type="text" placeholder="Short Description" style={{ padding: "10px", borderRadius: "6px" }} />
 
-      <button
-        onClick={() => setShowChecklist(!showChecklist)}
-        style={{
-          padding: "12px",
-          background: allChecked ? "#4caf50" : "var(--red)",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-          fontWeight: "600",
-          fontSize: "14px",
-        }}
-      >
-        {allChecked ? "✅ Compliance Verified" : "📋 Complete Compliance Checklist (Required)"}
-      </button>
+      {isNollywood && (
+        <>
+          <button
+            onClick={() => setShowChecklist(!showChecklist)}
+            style={{
+              padding: "12px",
+              background: allChecked ? "#4caf50" : "var(--red)",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "14px",
+            }}
+          >
+            {allChecked ? "✅ Compliance Verified" : "📋 Complete Compliance Checklist (Required)"}
+          </button>
 
-      {showChecklist && (
-        <div style={{ background: "var(--bg)", borderRadius: "8px", padding: "16px", border: "1px solid var(--border)", fontSize: "13px", lineHeight: "1.6" }}>
-          <h4 style={{ fontSize: "15px", marginBottom: "12px", color: "var(--red)" }}>🎬 NaijaFlix Nollywood Content Checklist</h4>
+          {showChecklist && (
+            <div style={{ background: "var(--bg)", borderRadius: "8px", padding: "16px", border: "1px solid var(--border)", fontSize: "13px", lineHeight: "1.6" }}>
+              <h4 style={{ fontSize: "15px", marginBottom: "12px", color: "var(--red)" }}>🎬 NaijaFlix Nollywood Content Checklist</h4>
 
-          <div style={{ marginBottom: "16px" }}>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-              <input type="checkbox" checked={check1} onChange={(e) => setCheck1(e.target.checked)} style={checkboxStyle} />
-              <div>
-                <b>1. NFVCB Classification</b><br />
-                <span style={{ color: "#888" }}>I confirm this movie has been reviewed and classified by the NFVCB for public distribution in Nigeria.</span>
+              <div style={{ marginBottom: "16px" }}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                  <input type="checkbox" checked={check1} onChange={(e) => setCheck1(e.target.checked)} style={checkboxStyle} />
+                  <div>
+                    <b>1. NFVCB Classification</b><br />
+                    <span style={{ color: "#888" }}>I confirm this movie has been reviewed and classified by the NFVCB for public distribution in Nigeria.</span>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter NFVCB Certificate/Classification Number *"
+                  value={nfvcbNumber}
+                  onChange={(e) => setNfvcbNumber(e.target.value)}
+                  style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--text)", boxSizing: "border-box", marginTop: "4px" }}
+                />
               </div>
-            </div>
-            <input
-              type="text"
-              placeholder="Enter NFVCB Certificate/Classification Number *"
-              value={nfvcbNumber}
-              onChange={(e) => setNfvcbNumber(e.target.value)}
-              style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--text)", boxSizing: "border-box", marginTop: "4px" }}
-            />
-          </div>
 
-          <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-            <input type="checkbox" checked={check2} onChange={(e) => setCheck2(e.target.checked)} style={checkboxStyle} />
-            <div>
-              <b>2. Soundtrack & Audio Rights</b><br />
-              <span style={{ color: "#888" }}>I certify all background music, sound effects, and soundtracks are original, public domain, or fully licensed for commercial streaming.</span>
-            </div>
-          </div>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+                <input type="checkbox" checked={check2} onChange={(e) => setCheck2(e.target.checked)} style={checkboxStyle} />
+                <div>
+                  <b>2. Soundtrack & Audio Rights</b><br />
+                  <span style={{ color: "#888" }}>I certify all background music, sound effects, and soundtracks are original, public domain, or fully licensed for commercial streaming.</span>
+                </div>
+              </div>
 
-          <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-            <input type="checkbox" checked={check3} onChange={(e) => setCheck3(e.target.checked)} style={checkboxStyle} />
-            <div>
-              <b>3. Production & Ownership Rights</b><br />
-              <span style={{ color: "#888" }}>I warrant I am the Executive Producer, Director, or authorized distributor. This movie is not locked under an exclusive contract with Netflix, Prime Video, Showmax, or a cinema chain.</span>
-            </div>
-          </div>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+                <input type="checkbox" checked={check3} onChange={(e) => setCheck3(e.target.checked)} style={checkboxStyle} />
+                <div>
+                  <b>3. Production & Ownership Rights</b><br />
+                  <span style={{ color: "#888" }}>I warrant I am the Executive Producer, Director, or authorized distributor. This movie is not locked under an exclusive contract with Netflix, Prime Video, Showmax, or a cinema chain.</span>
+                </div>
+              </div>
 
-          <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-            <input type="checkbox" checked={check4} onChange={(e) => setCheck4(e.target.checked)} style={checkboxStyle} />
-            <div>
-              <b>4. NaijaFlix Terms of Distribution</b><br />
-              <span style={{ color: "#888" }}>I understand this binds me to the Non-Exclusive Digital Creator Distribution Agreement. If this movie generates zero ad impressions, my payout will be ₦0.00.</span>
-            </div>
-          </div>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+                <input type="checkbox" checked={check4} onChange={(e) => setCheck4(e.target.checked)} style={checkboxStyle} />
+                <div>
+                  <b>4. NaijaFlix Terms of Distribution</b><br />
+                  <span style={{ color: "#888" }}>I understand this binds me to the Non-Exclusive Digital Creator Distribution Agreement. If this movie generates zero ad impressions, my payout will be ₦0.00.</span>
+                </div>
+              </div>
 
-          {!allChecked && (
-            <p style={{ fontSize: "12px", color: "#ff9800", textAlign: "center" }}>⚠️ All boxes must be checked and NFVCB number entered to upload.</p>
+              {!allChecked && (
+                <p style={{ fontSize: "12px", color: "#ff9800", textAlign: "center" }}>⚠️ All boxes must be checked and NFVCB number entered to upload.</p>
+              )}
+              {allChecked && (
+                <p style={{ fontSize: "12px", color: "#4caf50", textAlign: "center" }}>✅ Compliance verified! You can now upload.</p>
+              )}
+            </div>
           )}
-          {allChecked && (
-            <p style={{ fontSize: "12px", color: "#4caf50", textAlign: "center" }}>✅ Compliance verified! You can now upload.</p>
-          )}
-        </div>
+        </>
       )}
 
       <label style={{
         padding: "14px",
-        background: uploading ? "#666" : (allChecked ? "var(--red)" : "#444"),
+        background: uploading ? "#666" : (canUpload ? "var(--red)" : "#444"),
         color: "white",
         borderRadius: "6px",
         textAlign: "center",
-        cursor: allChecked && !uploading ? "pointer" : "not-allowed",
+        cursor: canUpload && !uploading ? "pointer" : "not-allowed",
         fontWeight: "bold",
-        opacity: allChecked || uploading ? 1 : 0.5,
+        opacity: canUpload || uploading ? 1 : 0.5,
       }}>
-        {uploading ? `⬆️ Uploading... ${progress}%` : allChecked ? "📁 Tap To Choose Video From Phone" : "🔒 Complete checklist to unlock upload"}
-        <input type="file" accept="video/*" onChange={handleFile} disabled={uploading || !allChecked} style={{ display: "none" }} />
+        {uploading ? `⬆️ Uploading... ${progress}%` : (isNollywood && !canUpload) ? "🔒 Complete checklist to unlock upload" : "📁 Tap To Choose Video From Phone"}
+        <input type="file" accept="video/*" onChange={handleFile} disabled={uploading || !canUpload} style={{ display: "none" }} />
       </label>
     </div>
   );
