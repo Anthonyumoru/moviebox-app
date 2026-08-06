@@ -253,7 +253,7 @@ function App() {
   };
 
   const handleShare = async (movie) => {
-    const shareUrl = window.location.href;
+    const shareUrl = `https://naijaflix.site/movie/${movie.id}`;
     const shareText = `🎬 Check out "${movie.title}" on NaijaFlix!`;
     if (navigator.share) {
       try {
