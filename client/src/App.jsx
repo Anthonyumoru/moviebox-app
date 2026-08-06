@@ -380,9 +380,7 @@ function App() {
     });
   } else {
     if (filtered.length > 0) moviesByCategory["Results"] = filtered;
-  }Here's **Part 3** (final part) — copy this:
-
-```jsx
+  }
   return (
     <div className="home">
       <div className="nav">
