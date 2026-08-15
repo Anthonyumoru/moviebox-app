@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { languages } from '../translations';
 
-const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
+const API_URL = import.meta.env.VITE_API_URL || "https://naijaflix-contact.umoruanthony345.workers.dev";
 
 export default function Settings({ user, onLogout, settings, setSettings }) {
   const [showAbout, setShowAbout] = useState(false);
