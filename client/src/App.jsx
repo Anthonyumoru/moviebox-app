@@ -3,7 +3,7 @@ import R2Uploader from './components/R2Uploader';
 import CastButton from './components/CastButton';
 import Settings from './components/Settings';
 import axios from 'axios';
-
+import Help from './components/Help';
 const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
 const TIPS_API = "https://naijaflix-tips.umoruanthony345.workers.dev";
 
@@ -635,6 +635,7 @@ function App() {
           <button className="theme-toggle" onClick={() => { setShowCreatorDashboard(!showCreatorDashboard); if (creatorId) fetchDashboard(creatorId); }} style={{ fontSize: "16px" }}>💰 Creator</button>
           <button className="theme-toggle" onClick={() => setShowAdminSetup(true)} style={{ fontSize: "16px" }}>⚙️</button>
           <button className="theme-toggle" onClick={() => setShowRequests(!showRequests)} style={{ fontSize: "16px" }}>🎯 Requests</button>
+          <Help />
           <button className="theme-toggle" onClick={() => setShowSettings(true)} style={{ fontSize: "16px" }}>☰</button>
           <button className="theme-toggle" onClick={() => setDark(!dark)}>{dark ? "☀️" : "🌙"}</button>
         </div>
