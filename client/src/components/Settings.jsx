@@ -264,14 +264,14 @@ export default function Settings({ user, onLogout, settings, setSettings }) {
               Available Mon–Sat, 9am–6pm (WAT)
             </p>
             <a
-              href="tel:+2348012345678"
+              href="tel:+2348112576421"
               style={{ display: 'block', width: '100%', padding: '16px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', fontSize: '17px', textDecoration: 'none', marginBottom: '12px', boxSizing: 'border-box' }}
             >
               📞 Call Now
             </a>
-            <p style={{ fontSize: '15px', color: 'var(--text)', marginTop: '12px', fontWeight: '600' }}>+234 801 234 5678</p>
+            <p style={{ fontSize: '15px', color: 'var(--text)', marginTop: '12px', fontWeight: '600' }}>+234 9122274678</p>
             <p style={{ fontSize: '12px', color: '#888', marginTop: '16px' }}>
-              Calling outside Nigeria? Use WhatsApp: +234 801 234 5678
+              Calling outside Nigeria? Use WhatsApp: +234 9122274678
             </p>
           </div>
         </div>
