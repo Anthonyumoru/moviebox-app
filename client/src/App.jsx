@@ -815,9 +815,6 @@ function App() {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, overflow: "auto" }}>
           <div style={{ background: "var(--card)", borderRadius: "12px", padding: "24px", maxWidth: "500px", width: "90%", border: "1px solid var(--border)", marginTop: "20px", marginBottom: "20px" }}>
             <button onClick={() => setShowCreatorDashboard(false)} style={{ float: "right", background: "var(--red)", color: "white", border: "none", borderRadius: "50%", width: "32px", height: "32px", cursor: "pointer", fontSize: "16px" }}>✕</button>
-            <h2 styleThe code got cut off at the very end. Here is the rest of it. Paste this right after where it stopped:
-
-```jsx
             <h2 style={{ marginBottom: "16px" }}>💰 Creator Dashboard</h2>
             {isVerified && (
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px", padding: "10px 14px", background: "var(--bg)", borderRadius: "8px", border: "1px solid var(--border)" }}>
