@@ -7,7 +7,7 @@ import Help from './components/Help';
 const API_URL = import.meta.env.VITE_API_URL || "https://moviebox-backend.umoruanthony345.workers.dev";
 const TIPS_API = "https://naijaflix-tips.umoruanthony345.workers.dev";
 const STREAM_URL = "https://moviebox-stream.umoruanthony345.workers.dev/video?url=";
-const AUTH_API = "https://moviebox-auth.umoruanthony345.workers.dev";
+const AUTH_API = "https://auth.naijaflix.site";
 
 const VerifiedBadge = ({ size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" style={{ flexShrink: "0", display: "inline-block", verticalAlign: "middle" }}>
