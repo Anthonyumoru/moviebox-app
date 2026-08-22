@@ -1,2 +1,3 @@
-# moviebox-app
-movie streaming platform where users can upload, browse and watch
+# NaijaFlix
+African movie streaming platform where creators upload, browse and watch.
+Hosted on Cloudflare Workers + R2.
